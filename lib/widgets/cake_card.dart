@@ -9,7 +9,7 @@ class CakeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
@@ -39,7 +39,7 @@ class CakeCard extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 1.2, // keep square-ish shape
-                child: Image.asset(cake.imageUrl, fit: BoxFit.cover),
+                child: Image.asset(cake.imageUrls.first, fit: BoxFit.cover),
               ),
             ),
             // 📝 Keep remaining content scrollable or flexible
@@ -79,7 +79,7 @@ class CakeCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.pinkAccent,
+                            color: Colors.green,
                           ),
                         ),
                         const SizedBox(width: 6),

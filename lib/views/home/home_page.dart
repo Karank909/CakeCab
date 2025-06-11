@@ -3,8 +3,10 @@ import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cakecab/widgets/cake_card.dart';
 import 'package:cakecab/models/sample_data.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
 
-import '../cart/cart_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -80,18 +82,16 @@ class _HomePageState extends State<HomePage> {
                       shape: BoxShape.circle,
                     ),
                     child: Text(
-                      '2',
-                      style: TextStyle(color: Colors.white, fontSize: 10),
+                      '${Provider.of<CartProvider>(context).items.length}',
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
                     ),
+
                   ),
                 ),
               ],
             ),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CartPage()),
-              );
+              Navigator.pushNamed(context, '/cart');
             },
           ),
           IconButton(
@@ -161,6 +161,7 @@ class _HomePageState extends State<HomePage> {
                 // 🧁 Cake Grid
                 Expanded(
                     child: GridView.builder(
+                      physics: const BouncingScrollPhysics(),
                       controller: _scrollController,
                       padding: const EdgeInsets.all(8),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -173,7 +174,11 @@ class _HomePageState extends State<HomePage> {
                       ),
                       itemCount: featuredCakes.length,
                       itemBuilder: (context, index) {
-                        return CakeCard(cake: featuredCakes[index]);
+                        return CakeCard(cake: featuredCakes[index])
+
+                            .animate()
+                            .fade(duration: 400.ms)
+                            .slideY(begin: 0.2);
                       },
                     )
 

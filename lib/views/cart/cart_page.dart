@@ -1,106 +1,78 @@
 import 'package:flutter/material.dart';
-import '../../models/cake.dart';
-import '../checkout/checkout_page.dart';
+import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
 
-
-class CartPage extends StatefulWidget {
+class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
   @override
-  State<CartPage> createState() => _CartPageState();
-}
-
-class _CartPageState extends State<CartPage> {
-  // Temporary cart list
-  List<Map<String, dynamic>> cartItems = [
-    {
-      'cake': Cake(
-        name: 'Choco Delight',
-        price: 500,
-        imageUrl: 'assets/images/choco_cake.jpg',
-        description: 'Rich chocolate cake',
-        rating: 4.5,
-        size: 'Medium',
-
-      ),
-      'quantity': 2,
-    },
-    {
-      'cake': Cake(
-        name: 'Strawberry Cream',
-        price: 500,
-        imageUrl: 'assets/images/strawberry_cake.jpg',
-        description: 'Fluffy sponge with strawberry cream',
-        rating: 4.2,
-        size: 'Large',
-      ),
-      'quantity': 1,
-    },
-  ];
-
-  int getTotalPrice() {
-    return cartItems.fold<int>(0, (sum, item) {
-      return sum + (item['cake'].price as int) * (item['quantity'] as int);
-    });
-  }
-
-
-  @override
   Widget build(BuildContext context) {
+    final cart = Provider.of<CartProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Cart'),
-        backgroundColor: Colors.pinkAccent,
+        title: const Text('My Cart'),
+        backgroundColor: Colors.transparent,
       ),
-      body: Column(
+      body: cart.items.isEmpty
+          ? const Center(
+        child: Text('Your cart is empty.'),
+      )
+          : Column(
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: cartItems.length,
-              padding: const EdgeInsets.all(16),
+              itemCount: cart.items.length,
               itemBuilder: (context, index) {
-                final cake = cartItems[index]['cake'] as Cake;
-                final quantity = cartItems[index]['quantity'];
-
+                final item = cart.items[index];
                 return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        cake.imageUrl,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    title: Text(cake.name),
-                    subtitle: Text('₹${cake.price} x $quantity'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          onPressed: () {
-                            if (quantity > 1) {
-                              setState(() => cartItems[index]['quantity']--);
-                            }
-                          },
+                        // 🧁 Cake Image
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            item.image,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        Text('$quantity'),
+
+                        const SizedBox(width: 12),
+
+                        // 📋 Cake Info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item.name,
+                                  style: const TextStyle(
+                                      fontSize: 16, fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 4),
+                              Text('₹${item.price} x ${item.quantity}',
+                                  style: TextStyle(color: Colors.grey[700])),
+                            ],
+                          ),
+                        ),
+
+                        // 🗑 Delete
                         IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
+                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                           onPressed: () {
-                            setState(() => cartItems[index]['quantity']++);
+                            cart.removeItem(item);
                           },
                         ),
                       ],
                     ),
                   ),
                 );
+
               },
             ),
           ),
@@ -109,46 +81,33 @@ class _CartPageState extends State<CartPage> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Total:',
-                      style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '₹${getTotalPrice()}',
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.pink),
-                    ),
+                    const Text('Total:',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text('₹${cart.totalPrice}',
+                        style: const TextStyle(fontSize: 18, color: Colors.pink)),
                   ],
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CheckoutPage()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pinkAccent,
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
-                    child: const Text("Proceed to Checkout"),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    // For tomorrow: Navigate to checkout
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pink,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-
+                  child: const Text('Proceed to Checkout'),
                 ),
               ],
             ),
           ),
+
         ],
       ),
     );
